@@ -53,3 +53,19 @@ def test_int():
             call([' ', 'SPACE']),
             call(['3', 'INT'])
         ]
+
+    
+def test_str():
+
+    with mock.patch('builtins.print') as mock_print:
+        Lexer(text="""'Hello' "Hi" "Don't" 'Quote "A wise man once said..."'""").run(debug=True)
+
+        assert mock_print.call_args_list == [
+            call(["'Hello'", 'STR']),
+            call([' ', 'SPACE']),
+            call(['"Hi"', 'STR']),
+            call([' ', 'SPACE']),
+            call(['"Don\'t"', 'STR']),
+            call([' ', 'SPACE']),
+            call(['\'Quote "A wise man once said..."\'', 'STR'])
+        ]
