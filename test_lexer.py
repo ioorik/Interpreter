@@ -1,5 +1,6 @@
 
-from Interpreter import Lexer
+import unittest
+from Interpreter import Lexer, UnclosedStringError, InvalidNumberError
 from unittest import mock
 from unittest.mock import call
 
@@ -16,7 +17,7 @@ def test_word() -> None:
         ]
 
 
-def  test_float():
+def test_float():
 
     with mock.patch('builtins.print') as mock_print:
         Lexer(text="""1.1
@@ -24,7 +25,8 @@ def  test_float():
 1.0
 0.0
 10.0
-0.10""").run(debug=True)
+0.10
+.20""").run(debug=True)
         
         assert mock_print.call_args_list == [
             call(['1.1', 'FLOAT']),
@@ -38,6 +40,8 @@ def  test_float():
             call(['10.0', 'FLOAT']),
             call(['\n', 'EOL']),
             call(['0.10', 'FLOAT']),
+            call(['\n', 'EOL']),
+            call(['.20', 'FLOAT'])
         ]
 
 
@@ -69,3 +73,28 @@ def test_str():
             call([' ', 'SPACE']),
             call(['\'Quote "A wise man once said..."\'', 'STR'])
         ]
+
+
+class test_errors(unittest.TestCase):
+
+    def test_unclosed_string(self) -> None:
+        with self.assertRaises(expected_exception=UnclosedStringError) as context:
+            Lexer(text="'Hello").run()
+        
+        assert str(object=context.exception) == "Unclosed String!"
+
+        with self.assertRaises(expected_exception=UnclosedStringError) as context:
+            Lexer(text='"Hello').run()
+        
+        assert str(object=context.exception) == "Unclosed String!"
+            
+    def test_invalid_number(self) -> None:
+        with self.assertRaises(expected_exception=InvalidNumberError) as context:
+            Lexer(text="1.0.0").run()
+
+        assert str(object=context.exception) == "Invalid Number Format!"
+
+        with self.assertRaises(expected_exception=InvalidNumberError) as context:
+            Lexer(text="01").run()
+
+        assert str(object=context.exception) == "Invalid Number Format!"

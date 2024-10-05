@@ -18,7 +18,7 @@ class Lexer:
         self._source: list[str] = list(text)
         self._tokens: list[list[str]] = []
     
-    def run(self, debug: bool = False):
+    def run(self, debug: bool = False) -> None:
         while self._source:
             char: str = self._source.pop(0)
             token: str = char
@@ -40,6 +40,8 @@ class Lexer:
                         raise InvalidNumberError
                     else:
                         token += nextC
+                    if token.startswith("0") and token[1] != ".":
+                        raise InvalidNumberError
                 if not dot:
                     self._tokens.append([token, "INT"])
                 else:
